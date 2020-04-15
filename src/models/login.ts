@@ -117,7 +117,7 @@ const Model: LoginModelType = {
       }
 
       // by user role to ensure menus
-      const authes:string[] = ["user", "admin"];
+      const authes:string[] = ["Scotter", "Player"];
       setAuthority(authes);
 
       return {

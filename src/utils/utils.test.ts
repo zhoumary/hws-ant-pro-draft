@@ -39,38 +39,38 @@ describe('isUrl tests', (): void => {
 describe('getRouteAuthority tests', () => {
   it('should return authority for each route', (): void => {
     const routes = [
-      { path: '/user', name: 'user', authority: ['user'], exact: true },
-      { path: '/admin', name: 'admin', authority: ['admin'], exact: true },
+      { path: '/user', name: 'user', authority: ['Player'], exact: true },
+      { path: '/admin', name: 'admin', authority: ['Scotter'], exact: true },
     ];
-    expect(getRouteAuthority('/user', routes)).toEqual(['user']);
-    expect(getRouteAuthority('/admin', routes)).toEqual(['admin']);
+    expect(getRouteAuthority('/user', routes)).toEqual(['Player']);
+    expect(getRouteAuthority('/admin', routes)).toEqual(['Scotter']);
   });
 
   it('should return inherited authority for unconfigured route', (): void => {
     const routes = [
-      { path: '/nested', authority: ['admin', 'user'], exact: true },
+      { path: '/nested', authority: ['Scotter', 'Player'], exact: true },
       { path: '/nested/user', name: 'user', exact: true },
     ];
-    expect(getRouteAuthority('/nested/user', routes)).toEqual(['admin', 'user']);
+    expect(getRouteAuthority('/nested/user', routes)).toEqual(['Scotter', 'Player']);
   });
 
   it('should return authority for configured route', (): void => {
     const routes = [
-      { path: '/nested', authority: ['admin', 'user'], exact: true },
-      { path: '/nested/user', name: 'user', authority: ['user'], exact: true },
-      { path: '/nested/admin', name: 'admin', authority: ['admin'], exact: true },
+      { path: '/nested', authority: ['Scotter', 'Player'], exact: true },
+      { path: '/nested/user', name: 'user', authority: ['Player'], exact: true },
+      { path: '/nested/admin', name: 'admin', authority: ['Scotter'], exact: true },
     ];
-    expect(getRouteAuthority('/nested/user', routes)).toEqual(['user']);
-    expect(getRouteAuthority('/nested/admin', routes)).toEqual(['admin']);
+    expect(getRouteAuthority('/nested/user', routes)).toEqual(['Player']);
+    expect(getRouteAuthority('/nested/admin', routes)).toEqual(['Scotter']);
   });
 
   it('should return authority for substring route', (): void => {
     const routes = [
-      { path: '/nested', authority: ['user', 'users'], exact: true },
-      { path: '/nested/users', name: 'users', authority: ['users'], exact: true },
-      { path: '/nested/user', name: 'user', authority: ['user'], exact: true },
+      { path: '/nested', authority: ['Player', 'Players'], exact: true },
+      { path: '/nested/users', name: 'users', authority: ['Players'], exact: true },
+      { path: '/nested/user', name: 'user', authority: ['Player'], exact: true },
     ];
-    expect(getRouteAuthority('/nested/user', routes)).toEqual(['user']);
-    expect(getRouteAuthority('/nested/users', routes)).toEqual(['users']);
+    expect(getRouteAuthority('/nested/user', routes)).toEqual(['Player']);
+    expect(getRouteAuthority('/nested/users', routes)).toEqual(['Players']);
   });
 });
