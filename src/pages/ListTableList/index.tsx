@@ -190,7 +190,7 @@ const TableList: React.FC<{}> = () => {
             </span>
           </div>
         )}
-        request={(params) => queryRule(params)}
+        // request={(params) => queryRule(params)}
         columns={columns}
         rowSelection={{}}
       />

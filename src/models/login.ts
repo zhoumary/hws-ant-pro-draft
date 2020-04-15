@@ -1,14 +1,16 @@
 import { stringify } from 'querystring';
 import { history, Reducer, Effect } from 'umi';
+import { Cookies } from 'react-cookie';
 
-import { fakeAccountLogin } from '@/services/login';
+import { login, logout } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 
 export interface StateType {
-  status?: 'ok' | 'error';
+  status?: number;
   type?: string;
-  currentAuthority?: 'user' | 'guest' | 'admin';
+  currentAuthority?: string[];
+  userID?: number;
 }
 
 export interface LoginModelType {
@@ -32,13 +34,32 @@ const Model: LoginModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
-      yield put({
-        type: 'changeLoginStatus',
-        payload: response,
-      });
-      // Login successfully
-      if (response.status === 'ok') {
+      const response = yield call(login, payload);
+
+      if (!response) {
+        return;
+      }
+
+
+      const loginCookies = new Cookies();
+      let respStatus: number;
+      if (response.response) {
+        respStatus = response.response.status;
+      } else {
+        respStatus = response.status;
+      }
+
+
+      if (respStatus === 200) {
+        yield put({
+          type: 'changeLoginStatus',
+          payload: response,
+        });
+
+        // set logged_in cookie
+        loginCookies.set('isLoggedIn', true, { path: "/", expires: new Date(Date.now()+1800000)});
+        loginCookies.set('userID', response.data.id, { path: "/", expires: new Date(Date.now()+1800000)});
+
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };
@@ -55,13 +76,26 @@ const Model: LoginModelType = {
           }
         }
         history.replace(redirect || '/');
+
+      } else {
+        // set logged_in cookie
+        loginCookies.set('isLoggedIn', false);
+        loginCookies.set('userID', "");
       }
     },
 
-    logout() {
+    *logout({ payload }, { call }) {
+      const response = yield call(logout, payload);
+      console.log(response);
+
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {
+        // set logged_in cookie
+        const loginCookies = new Cookies();
+        loginCookies.set('isLoggedIn', false);
+        loginCookies.set('userID', "");
+
         history.replace({
           pathname: '/user/login',
           search: stringify({
@@ -74,11 +108,23 @@ const Model: LoginModelType = {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      const userData = payload.data;
+      const userResponse = payload.response;
+      if (!userData || !userResponse) {
+        return {
+          ...state
+        };
+      }
+
+      // by user role to ensure menus
+      const authes:string[] = ["user", "admin"];
+      setAuthority(authes);
+
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
+        status: userResponse.status,
+        type: "account",
+        userID: userData.id
       };
     },
   },

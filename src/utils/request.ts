@@ -26,8 +26,29 @@ const codeMessage = {
 /**
  * 异常处理程序
  */
-const errorHandler = (error: { response: Response }): Response => {
-  const { response } = error;
+const errorHandler = (error: { response: Response, data?: string | any }): Response => {
+  const { response, data } = error;
+
+  // judge whether the data - error message is exited
+  if (typeof data === 'string') {
+    notification.error({
+      message: `请求错误`,
+      description: data,
+    });
+
+    return response;
+  }
+
+  if (typeof data !== 'string') {
+    notification.error({
+      message: `请求错误`,
+      description: data.error,
+    });
+
+    return response;
+  }
+
+  // the data - error message is not exited
   if (response && response.status) {
     const errorText = codeMessage[response.status] || response.statusText;
     const { status, url } = response;
@@ -49,8 +70,10 @@ const errorHandler = (error: { response: Response }): Response => {
  * 配置request请求时的默认参数
  */
 const request = extend({
+  prefix: 'http://10.130.228.66:9091/hws-user',
   errorHandler, // 默认错误处理
-  credentials: 'include', // 默认请求是否带上cookie
+  // credentials: 'include', // 默认请求是否带上cookie
+  timeout: 5000,
 });
 
 export default request;

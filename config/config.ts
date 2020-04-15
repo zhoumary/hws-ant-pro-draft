@@ -55,7 +55,8 @@ export default defineConfig({
         {
           path: '/',
           component: '../layouts/BasicLayout',
-          authority: ['admin', 'user'],
+          authority: ['user'],
+          role: ['Scotter', 'Player'],
           routes: [
             {
               path: '/',
@@ -73,6 +74,7 @@ export default defineConfig({
               icon: 'crown',
               component: './Admin',
               authority: ['admin'],
+              role: ['Admin'],
               routes: [
                 {
                   path: '/admin/sub-page',
@@ -80,6 +82,7 @@ export default defineConfig({
                   icon: 'smile',
                   component: './Welcome',
                   authority: ['admin'],
+                  role: ['Admin'],
                 },
               ],
             },
@@ -90,12 +93,14 @@ export default defineConfig({
               component: './ListTableList',
             },
             {
+              path: '*',
+              redirect: '/welcome',
               component: './Welcome',
             },
           ],
         },
         {
-          component: './404',
+          component: './Welcome',
         },
       ],
     },

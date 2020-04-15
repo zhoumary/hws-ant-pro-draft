@@ -13,6 +13,9 @@ import React, { useEffect } from 'react';
 import { Link, useIntl, connect, Dispatch } from 'umi';
 import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
+import { Cookies } from 'react-cookie';
+
+
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
@@ -82,6 +85,8 @@ const defaultFooterDom = (
   />
 );
 
+
+
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   const {
     dispatch,
@@ -91,17 +96,22 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       pathname: '/',
     },
   } = props;
+  let userID: number | undefined;
   /**
    * constructor
    */
 
   useEffect(() => {
-    if (dispatch) {
+    const currCookies = new Cookies();
+    userID = currCookies.get("userID");
+
+    if (dispatch && userID) {
       dispatch({
         type: 'user/fetchCurrent',
+        userid: userID
       });
     }
-  }, []);
+  }, [userID]);
 
   /**
    * init variables

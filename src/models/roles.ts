@@ -2,9 +2,14 @@ import { Effect, Reducer } from 'umi';
 
 import { getRoles } from '@/services/roles';
 
+export interface CurrentRole {
+  id?: number;
+  description?: string;
+}
+
 export interface RoleType {
-  status?: 'ok' | 'error';
-  roles?: string[];
+  status?: number;
+  roles?: Array<CurrentRole>;
 }
 
 export interface RoleModelType {
@@ -26,8 +31,8 @@ const RoleModel: RoleModelType = {
   },
 
   effects: {
-    *getRoles({ payload }, { call, put }) {
-      const response = yield call(getRoles, payload);
+    *getRoles(_, { call, put }) {
+      const response = yield call(getRoles);
       yield put({
         type: 'getRolesHandle',
         payload: response,
@@ -40,6 +45,7 @@ const RoleModel: RoleModelType = {
       return {
         ...state,
         status: payload.status,
+        roles: payload.data  || []
       };
     },
   },

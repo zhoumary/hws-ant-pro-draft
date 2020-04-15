@@ -1,7 +1,7 @@
-import request from 'umi-request';
+import request from '@/utils/request';
 
 export async function getRoles() {
-  return request('/api/roles', {
+  return request('/api/v1/roles', {
     method: 'GET'
   });
 }

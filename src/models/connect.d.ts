@@ -3,6 +3,8 @@ import { GlobalModelState } from './global';
 import { DefaultSettings as SettingModelState } from '../../config/defaultSettings';
 import { UserModelState } from './user';
 import { StateType } from './login';
+import {RegisterStateType} from './register';
+import {RoleType} from './roles';
 
 export { GlobalModelState, SettingModelState, UserModelState };
 
@@ -24,6 +26,8 @@ export interface ConnectState {
   settings: SettingModelState;
   user: UserModelState;
   login: StateType;
+  register: RegisterStateType;
+  roles: RoleType;
 }
 
 export interface Route extends MenuDataItem {

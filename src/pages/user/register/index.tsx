@@ -2,7 +2,9 @@ import { Form, Button, Col, Input, Popover, Progress, Row, Select, message } fro
 import React, { FC, useState, useEffect } from 'react';
 import { Link, connect, history, FormattedMessage, formatMessage, Dispatch } from 'umi';
 
-import { StateType } from '@/models/register';
+import { RegisterStateType } from '@/models/register';
+import { RoleType } from '@/models/roles';
+import { ConnectState } from '@/models/connect';
 import styles from './style.less';
 
 const FormItem = Form.Item;
@@ -39,8 +41,9 @@ const passwordProgressMap: {
 
 interface RegisterProps {
   dispatch: Dispatch;
-  userAndregister: StateType;
-  submitting: boolean;
+  userAndregister: RegisterStateType;
+  currentRoles:RoleType;
+  submitting: boolean | undefined;
 }
 
 export interface UserRegisterParams {
@@ -50,12 +53,21 @@ export interface UserRegisterParams {
   mobile: string;
   roles: string[];
   password: string;
-  confirm: string;
+  confirmPassword: string;
   captcha: string;
 }
 
 
-const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) => {
+export const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister, currentRoles }) => {
+  const [content, setContent] = useState({
+    email: "",
+    mobile: "",
+    name: "",
+    password: "",
+    roles:  [],
+    confirmPassword: ""
+  });
+  let selectedRoles:any = [];
   const [count, setcount]: [number, any] = useState(0);
   const [visible, setvisible]: [boolean, any] = useState(false);
   const [prefix, setprefix]: [string, any] = useState('86');
@@ -68,7 +80,7 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
       return;
     }
     const account = form.getFieldValue('mail');
-    if (userAndregister.status === 'ok') {
+    if (userAndregister.status === 200) {
       message.success('注册成功！');
       history.push({
         pathname: '/user/register-result',
@@ -86,10 +98,14 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
   );
   useEffect(() => {
     dispatch({
-      type: 'roles/getRoles',
-      payload: {},
+      type: 'roles/getRoles'
     });
   }, [])
+
+  const loadRolesDesc = (eachRole:any) => {
+
+    return(<Option key={eachRole.id} value={eachRole.id}>{eachRole.description}</Option>)
+  }
   const onGetCaptcha = () => {
     let counts = 59;
     setcount(counts);
@@ -111,13 +127,12 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
     }
     return 'poor';
   };
-  const onFinish = (values: { [key: string]: any }) => {
+  const onFinish = () => {
+
+
     dispatch({
       type: 'userAndregister/submit',
-      payload: {
-        ...values,
-        prefix,
-      },
+      payload: content,
     });
   };
   const checkConfirm = (_: any, value: string) => {
@@ -188,6 +203,10 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
           <Input
             size="large"
             placeholder={formatMessage({ id: 'userandregister.name.placeholder' })}
+            onChange={e => {
+              const userName = e.target.value;
+              setContent({ ...content, name: userName });
+            }}
           />
         </FormItem>
         <FormItem
@@ -206,9 +225,14 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
           <Input
             size="large"
             placeholder={formatMessage({ id: 'userandregister.email.placeholder' })}
+            onChange={e => {
+              const userEmail = e.target.value;
+              setContent({ ...content, email: userEmail });
+            }}
           />
         </FormItem>
         <InputGroup compact>
+
           <Select size="large" value={prefix} onChange={changePrefix} style={{ width: '20%' }}>
             <Option value="86">+86</Option>
             <Option value="87">+87</Option>
@@ -230,6 +254,10 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
             <Input
               size="large"
               placeholder={formatMessage({ id: 'userandregister.phone-number.placeholder' })}
+              onChange={e => {
+                const phone = e.target.value;
+                setContent({ ...content, mobile: phone });
+              }}
             />
           </FormItem>
         </InputGroup>
@@ -237,7 +265,7 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
           name="role"
           rules={[
             {
-              required: true,
+              required: false,
               message: formatMessage({ id: 'userandregister.role.required' }),
             },
             {
@@ -250,7 +278,14 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
             mode="multiple"
             style={{ width: '100%' }}
             placeholder={formatMessage({ id: 'userandregister.role.placeholder' })}
-           />
+            onChange={e => {
+              selectedRoles = e
+
+              setContent({ ...content, roles: selectedRoles });
+            }}
+          >
+            {currentRoles.roles ? currentRoles.roles.map(loadRolesDesc) : []}
+          </Select>
         </Form.Item>
         <Popover
           getPopupContainer={(node) => {
@@ -291,6 +326,10 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
               size="large"
               type="password"
               placeholder={formatMessage({ id: 'userandregister.password.placeholder' })}
+              onChange={e => {
+                const userPassword = e.target.value;
+                setContent({ ...content, password: userPassword });
+              }}
             />
           </FormItem>
         </Popover>
@@ -310,6 +349,10 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
             size="large"
             type="password"
             placeholder={formatMessage({ id: 'userandregister.confirm-password.placeholder' })}
+            onChange={e => {
+              const userConfirmPassword = e.target.value;
+              setContent({ ...content, confirmPassword: userConfirmPassword });
+            }}
           />
         </FormItem>
         <Row gutter={8}>
@@ -318,7 +361,7 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
               name="captcha"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: formatMessage({ id: 'userandregister.verification-code.required' }),
                 },
               ]}
@@ -360,19 +403,16 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
     </div>
   );
 };
+
+
 export default connect(
   ({
-    userAndregister,
+    register,
+    roles,
     loading,
-  }: {
-    userAndregister: StateType;
-    loading: {
-      effects: {
-        [key: string]: boolean;
-      };
-    };
-  }) => ({
-    userAndregister,
+  }: ConnectState) => ({
+    userAndregister: register,
+    currentRoles:roles,
     submitting: loading.effects['userAndregister/submit'],
-  }),
+  })
 )(Register);
