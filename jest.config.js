@@ -1,26 +1,9 @@
 module.exports = {
-  roots: ["<rootDir>"],
-  moduleNameMapper: {
-      "\\.(css|scss)$": "identity-obj-proxy"
-  },
-  transform: {
-      "^.+\\.tsx?$": "ts-jest",
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileTransformer.js"
-  },
-  testMatch: null,
-  testRegex: "(/tests/.*|(\\.|/)(test))\\.js$",
-  moduleFileExtensions: ["tsx", "js"],
-  testEnvironment: "node",
+  testURL: 'http://localhost:8000',
+  testEnvironment: './tests/PuppeteerEnvironment',
+  verbose: false,
   globals: {
-    "ts-jest": {
-      diagnostics: {
-        warnOnly: true
-      }
-    },
-    "window": {}
+    ANT_DESIGN_PRO_ONLY_DO_NOT_USE_IN_YOUR_PRODUCTION: false,
+    localStorage: null,
   },
-
-  // Setup Enzyme
-  snapshotSerializers: ["enzyme-to-json/serializer"],
-  setupFilesAfterEnv: ["<rootDir>/src/setupEnzyme.ts"]
 };

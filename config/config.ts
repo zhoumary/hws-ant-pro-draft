@@ -55,8 +55,7 @@ export default defineConfig({
         {
           path: '/',
           component: '../layouts/BasicLayout',
-          authority: ['user'],
-          role: ['Scotter', 'Player'],
+          authority: ['Player'],
           routes: [
             {
               path: '/',
@@ -73,16 +72,16 @@ export default defineConfig({
               name: 'admin',
               icon: 'crown',
               component: './Admin',
-              authority: ['admin'],
-              role: ['Admin'],
+              authority: ['Scotter'],
+              privileges:['USER_CREATE', 'USER_READ'],
               routes: [
                 {
                   path: '/admin/sub-page',
                   name: 'sub-page',
                   icon: 'smile',
                   component: './Welcome',
-                  authority: ['admin'],
-                  role: ['Admin'],
+                  authority: ['Scotter'],
+                  privileges:['USER_CREATE', 'USER_READ'],
                 },
               ],
             },
